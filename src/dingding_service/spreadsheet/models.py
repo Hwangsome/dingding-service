@@ -189,6 +189,32 @@ class ErrorResponse(BaseModel):
     )
 
 
+class UserSearchResult(BaseModel):
+    """用户搜索结果项。"""
+
+    user_id: str = Field(..., description="用户 userId")
+    name: str = Field(..., description="用户姓名")
+    avatar: str = Field("", description="头像 URL")
+
+
+class UserDetailResponse(BaseModel):
+    """用户详情响应。"""
+
+    user_id: str = Field(..., description="用户 userId")
+    union_id: str = Field(..., description="用户的 unionId")
+    name: str = Field(..., description="用户姓名")
+    mobile: str = Field("", description="手机号")
+    dept_id_list: list[int] = Field(default_factory=list, description="所属部门 ID 列表")
+
+
+class DocumentItem(BaseModel):
+    """文档搜索结果项。"""
+
+    dentry_uuid: str = Field(..., description="文档 UUID（即 WORKBOOK_ID）")
+    name: str = Field(..., description="文档名称")
+    creator_name: str = Field("", description="创建者姓名")
+
+
 class ListSheetsResponse(BaseModel):
     """工作表列表响应体。
 

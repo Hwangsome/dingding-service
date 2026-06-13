@@ -321,3 +321,134 @@ class TestErrorCases:
         ]
         for resp in responses:
             assert resp.status_code == 503, f"期望 503，实际 {resp.status_code}"
+
+
+class TestSearchUsers:
+    """GET /api/users/search — 搜索通讯录用户。"""
+
+    def test_search_users_success(self, client, setup_standard_mocks, mock_client):
+        """验证搜索用户成功，返回用户列表。"""
+        resp = client.get("/api/users/search", params={"keyword": "张三"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "list" in data
+        assert len(data["list"]) == 2
+        assert data["list"][0]["userId"] == "user_001"
+        assert mock_client.search_users.await_count == 1
+
+    def test_search_users_no_keyword(self, client, setup_standard_mocks):
+        """验证不提供 keyword 时返回 422。"""
+        resp = client.get("/api/users/search")
+        assert resp.status_code == 422
+
+    def test_search_users_no_auth(self, client, unconfigured_settings, mock_client):
+        """验证只有钉钉凭证（无 workbook/operator）时可以正常使用。"""
+        from dingding_service.spreadsheet.routes import get_client, get_settings
+
+        client.app.dependency_overrides[get_settings] = lambda: unconfigured_settings
+        async def _mock_client():
+            return mock_client
+        client.app.dependency_overrides[get_client] = _mock_client
+
+        resp = client.get("/api/users/search", params={"keyword": "张三"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "list" in data
+        assert mock_client.search_users.await_count == 1
+
+    def test_search_users_no_creds(self, client):
+        """验证完全没有钉钉凭证时返回 503。"""
+        from dingding_service.spreadsheet.config import Settings
+        from dingding_service.spreadsheet.routes import get_settings
+
+        no_creds = Settings(
+            dingtalk_client_id="",
+            dingtalk_client_secret="",
+            workbook_id="",
+            operator_union_id="",
+        )
+        client.app.dependency_overrides[get_settings] = lambda: no_creds
+        resp = client.get("/api/users/search", params={"keyword": "张三"})
+        assert resp.status_code == 503
+        assert "钉钉凭证未配置" in resp.json()["detail"]
+
+
+class TestGetUserDetail:
+    """GET /api/users/{user_id} — 获取用户详情。"""
+
+    def test_get_user_detail_success(self, client, setup_standard_mocks, mock_client):
+        """验证获取用户详情成功，返回 unionId 等信息。"""
+        resp = client.get("/api/users/user_001")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["userId"] == "user_001"
+        assert data["unionId"] == "union_789"
+        assert data["name"] == "张三"
+        assert mock_client.get_user_detail.await_count == 1
+
+    def test_get_user_detail_no_creds(self, client):
+        """验证完全没有钉钉凭证时返回 503。"""
+        from dingding_service.spreadsheet.config import Settings
+        from dingding_service.spreadsheet.routes import get_settings
+
+        no_creds = Settings(
+            dingtalk_client_id="",
+            dingtalk_client_secret="",
+            workbook_id="",
+            operator_union_id="",
+        )
+        client.app.dependency_overrides[get_settings] = lambda: no_creds
+        resp = client.get("/api/users/user_001")
+        assert resp.status_code == 503
+        assert "钉钉凭证未配置" in resp.json()["detail"]
+
+
+class TestSearchDocuments:
+    """GET /api/documents/search — 搜索钉钉文档。"""
+
+    def test_search_documents_success(self, client, setup_standard_mocks, mock_client):
+        """验证搜索文档成功。"""
+        mock_client.search_documents = AsyncMock(
+            return_value={
+                "dentries": [
+                    {
+                        "dentryUuid": "wb_test_001",
+                        "name": "测试表格",
+                        "creatorName": "张三",
+                    }
+                ]
+            }
+        )
+        resp = client.get(
+            "/api/documents/search",
+            params={"operator_id": "union_789", "keyword": "测试"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "dentries" in data
+        assert data["dentries"][0]["dentryUuid"] == "wb_test_001"
+        assert mock_client.search_documents.await_count == 1
+
+    def test_search_documents_missing_operator(self, client, setup_standard_mocks):
+        """验证不提供 operator_id 时返回 422。"""
+        resp = client.get("/api/documents/search", params={"keyword": "测试"})
+        assert resp.status_code == 422
+
+    def test_search_documents_no_creds(self, client):
+        """验证完全没有钉钉凭证时返回 503。"""
+        from dingding_service.spreadsheet.config import Settings
+        from dingding_service.spreadsheet.routes import get_settings
+
+        no_creds = Settings(
+            dingtalk_client_id="",
+            dingtalk_client_secret="",
+            workbook_id="",
+            operator_union_id="",
+        )
+        client.app.dependency_overrides[get_settings] = lambda: no_creds
+        resp = client.get(
+            "/api/documents/search",
+            params={"operator_id": "union_789", "keyword": "测试"},
+        )
+        assert resp.status_code == 503
+        assert "钉钉凭证未配置" in resp.json()["detail"]

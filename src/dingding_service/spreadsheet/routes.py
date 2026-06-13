@@ -20,7 +20,7 @@ import logging
 from collections.abc import AsyncGenerator
 from functools import lru_cache
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from .client import SpreadsheetClient
 from .config import Settings
@@ -79,6 +79,26 @@ async def get_client(
 # ---------------------------------------------------------------------------
 # 内部辅助函数
 # ---------------------------------------------------------------------------
+
+
+def _require_auth(settings: Settings) -> str:
+    """仅校验钉钉凭证，不要求 workbook/operator 配置。
+
+    Args:
+        settings: 应用配置
+
+    Returns:
+        dingtalk_client_id 字符串
+
+    Raises:
+        HTTPException 503: 钉钉凭证未配置时
+    """
+    if not settings.dingtalk_client_id or not settings.dingtalk_client_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="钉钉凭证未配置，请先设置 DINGTALK_Client_ID 和 DINGTALK_Client_Secret",
+        )
+    return settings.dingtalk_client_id
 
 
 def _require_config(settings: Settings) -> tuple[str, str]:
@@ -335,4 +355,62 @@ async def clear_range(
     )
     wid, operator = _require_config(settings)
     result = await _call(client, "clear_range", wid, operator, sheet_id, body.range)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 配置查询 API — 无需 WORKBOOK_ID 和 OPERATOR_UNION_ID
+# ---------------------------------------------------------------------------
+
+
+@router.get("/users/search")
+async def search_users(
+    keyword: str = Query(..., description="搜索关键词（姓名或拼音）"),
+    settings: Settings = Depends(get_settings),
+    client: SpreadsheetClient = Depends(get_client),
+) -> dict:
+    """搜索钉钉通讯录用户。
+
+    无需预先配置 WORKBOOK_ID 或 OPERATOR_UNION_ID，
+    只需要钉钉应用凭证即可使用。
+    返回的 userId 可用于 get_user_detail 获取 unionId。
+    """
+    _require_auth(settings)
+    logger.info("GET /api/users/search — 搜索用户 | keyword=%s", keyword)
+    result = await _call(client, "search_users", keyword)
+    return result
+
+
+@router.get("/users/{user_id}")
+async def get_user_detail(
+    user_id: str,
+    settings: Settings = Depends(get_settings),
+    client: SpreadsheetClient = Depends(get_client),
+) -> dict:
+    """获取用户详情。
+
+    返回用户的 unionId、姓名、部门等信息。
+    返回的 unionId 即 OPERATOR_UNION_ID 所需的值。
+    """
+    _require_auth(settings)
+    logger.info("GET /api/users/%s — 用户详情", user_id)
+    result = await _call(client, "get_user_detail", user_id)
+    return result
+
+
+@router.get("/documents/search")
+async def search_documents(
+    keyword: str = Query("", description="文档名称关键词"),
+    operator_id: str = Query(..., description="操作人的 unionId"),
+    settings: Settings = Depends(get_settings),
+    client: SpreadsheetClient = Depends(get_client),
+) -> dict:
+    """搜索钉钉文档/表格。
+
+    需要提供 operatorId（unionId）用于权限校验。
+    返回的 dentryUuid 即 WORKBOOK_ID 所需的值。
+    """
+    _require_auth(settings)
+    logger.info("GET /api/documents/search — 搜索文档 | keyword=%s", keyword)
+    result = await _call(client, "search_documents", operator_id, keyword)
     return result

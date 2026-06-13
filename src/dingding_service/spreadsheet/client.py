@@ -447,6 +447,43 @@ class SpreadsheetClient:
             },
         )
 
+    async def search_users(
+        self, keyword: str, offset: int = 0, size: int = 10
+    ) -> dict[str, Any]:
+        """搜索通讯录用户。
+
+        通过钉钉新版 API 搜索企业通讯录中的用户。
+
+        Args:
+            keyword: 搜索关键词（名称或拼音）
+            offset:  分页偏移量
+            size:    每页数量，最大 20
+
+        Returns:
+            dict 包含 list 数组，每项有 userId, name, avatar 等字段
+        """
+        logger.info("搜索用户 | keyword=%s", keyword)
+        return await self._request(
+            "POST",
+            "/v1.0/contact/users/search",
+            json={"queryWord": keyword, "offset": offset, "size": size},
+        )
+
+    async def get_user_detail(self, user_id: str) -> dict[str, Any]:
+        """获取用户详情（含 unionId）。
+
+        Args:
+            user_id: 用户的 userId
+
+        Returns:
+            dict 包含 userId, unionId, name, mobile, dept_id_list 等
+        """
+        logger.info("获取用户详情 | userId=%s", user_id)
+        return await self._request(
+            "GET",
+            f"/v1.0/contact/users/{user_id}",
+        )
+
     async def close(self) -> None:
         """关闭 HTTP 客户端，释放连接池资源。"""
         await self._client.aclose()

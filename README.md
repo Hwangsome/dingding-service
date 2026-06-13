@@ -127,8 +127,8 @@ uv run dingding-spreadsheet
 |---------|---------|
 | `DINGTALK_Client_ID` | [开放平台](https://open-dev.dingtalk.com) → 应用详情 → 凭证与基础信息 → **AppKey** |
 | `DINGTALK_Client_Secret` | [开放平台](https://open-dev.dingtalk.com) → 应用详情 → 凭证与基础信息 → **AppSecret** |
-| `WORKBOOK_ID` | 钉钉文档 URL 中提取：`alidocs.dingtalk.com/i/nodes/{WORKBOOK_ID}` |
-| `OPERATOR_UNION_ID` | 部门用户列表 API 返回的 `unionId`，详见上方「获取操作人 unionId」 |
+| `WORKBOOK_ID` | 钉钉文档 URL 中提取：`alidocs.dingtalk.com/i/nodes/{WORKBOOK_ID}`；或通过 `GET /api/documents/search` 获取 |
+| `OPERATOR_UNION_ID` | 部门用户列表 API 返回的 `unionId`；或通过 `GET /api/users/search` + `GET /api/users/{user_id}` 获取 |
 
 ## 环境变量
 
@@ -156,6 +156,9 @@ uv run dingding-spreadsheet
 | `POST` | `/api/sheets/{sheet_id}/range/clear` | 清除单元格区域 |
 | `POST` | `/api/sheets/{sheet_id}/insertRowsBefore` | 在指定行上方插入行 |
 | `POST` | `/api/sheets/{sheet_id}/insertColumnsBefore` | 在指定列左侧插入列 |
+| `GET` | `/api/users/search` | 搜索通讯录用户，获取 userId |
+| `GET` | `/api/users/{user_id}` | 获取用户详情（含 unionId） |
+| `GET` | `/api/documents/search` | 搜索钉钉文档/表格，获取 dentryUuid 即 WORKBOOK_ID |
 
 ## Docker 启动
 

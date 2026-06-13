@@ -105,6 +105,23 @@ def mock_client():
             "columnCount": 26,
         }
     )
+    mock.search_users = AsyncMock(
+        return_value={
+            "list": [
+                {"userId": "user_001", "name": "张三", "avatar": "https://example.com/avatar1.png"},
+                {"userId": "user_002", "name": "李四", "avatar": "https://example.com/avatar2.png"},
+            ]
+        }
+    )
+    mock.get_user_detail = AsyncMock(
+        return_value={
+            "userId": "user_001",
+            "unionId": "union_789",
+            "name": "张三",
+            "mobile": "13800138000",
+            "dept_id_list": [1, 2],
+        }
+    )
     return mock
 
 
