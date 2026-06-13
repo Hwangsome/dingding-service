@@ -44,8 +44,7 @@
 
 ### 6. 获取操作人 unionId
 
-<details>
-<summary>方法一：通过旧版 API 获取（推荐，无需额外权限）</summary>
+#### 方法一：通过旧版 API 获取（推荐，无需额外权限）
 
 ```bash
 # 1. 获取 token
@@ -58,10 +57,8 @@ curl -X POST "https://oapi.dingtalk.com/topapi/v2/user/list?access_token={token}
 
 # 返回的 unionid 即为 OPERATOR_UNION_ID
 ```
-</details>
 
-<details>
-<summary>方法二：通过新版 API 获取（需要 qyapi_addresslist_search 权限）</summary>
+#### 方法二：通过新版 API 获取（需要 qyapi_addresslist_search 权限）
 
 ```bash
 # 1. 获取 token
@@ -79,12 +76,10 @@ curl -X POST "https://api.dingtalk.com/v1.0/contact/users/search" \
 curl "https://api.dingtalk.com/v1.0/contact/users/{userId}" \
   -H "x-acs-dingtalk-access-token: {token}"
 ```
-</details>
 
 ### 7. 获取目标工作簿 ID (workbookId)
 
-<details>
-<summary>方法一：从钉钉文档 URL 提取（最简单）</summary>
+#### 方法一：从钉钉文档 URL 提取（最简单）
 
 在钉钉客户端打开目标表格文档，复制链接。URL 格式为：
 
@@ -93,10 +88,8 @@ https://alidocs.dingtalk.com/i/nodes/{workbookId}
 ```
 
 `{workbookId}` 即为 `WORKBOOK_ID` 环境变量值。
-</details>
 
-<details>
-<summary>方法二：通过 API 搜索（需要 Storage.Dentry.Search 权限）</summary>
+#### 方法二：通过 API 搜索（需要 Storage.Dentry.Search 权限）
 
 ```bash
 curl -X POST "https://api.dingtalk.com/v2.0/storage/dentries/search" \
@@ -109,7 +102,6 @@ curl -X POST "https://api.dingtalk.com/v2.0/storage/dentries/search" \
   }'
 # 返回结果中 dentryUuid 即为 workbookId
 ```
-</details>
 
 ---
 
@@ -128,6 +120,15 @@ uv run dingding-spreadsheet
 ```
 
 服务启动后访问 http://localhost:8000/docs 查看 Swagger 文档。
+
+## 配置来源对照
+
+| 环境变量 | 获取位置 |
+|---------|---------|
+| `DINGTALK_Client_ID` | [开放平台](https://open-dev.dingtalk.com) → 应用详情 → 凭证与基础信息 → **AppKey** |
+| `DINGTALK_Client_Secret` | [开放平台](https://open-dev.dingtalk.com) → 应用详情 → 凭证与基础信息 → **AppSecret** |
+| `WORKBOOK_ID` | 钉钉文档 URL 中提取：`alidocs.dingtalk.com/i/nodes/{WORKBOOK_ID}` |
+| `OPERATOR_UNION_ID` | 部门用户列表 API 返回的 `unionId`，详见上方「获取操作人 unionId」 |
 
 ## 环境变量
 
