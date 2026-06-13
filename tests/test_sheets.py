@@ -94,12 +94,17 @@ class TestReadRange:
         assert resp.status_code == 200
         assert mock_client.get_range.await_count == 1
 
-    @pytest.mark.parametrize("range_str,expected_rows", [
-        ("A1:B2", 2),
-        ("A1:A1", 1),
-        ("A1:Z100", 100),
-    ])
-    def test_read_range_sizes(self, client, setup_standard_mocks, mock_client, range_str, expected_rows):
+    @pytest.mark.parametrize(
+        "range_str,expected_rows",
+        [
+            ("A1:B2", 2),
+            ("A1:A1", 1),
+            ("A1:Z100", 100),
+        ],
+    )
+    def test_read_range_sizes(
+        self, client, setup_standard_mocks, mock_client, range_str, expected_rows
+    ):
         """验证不同大小范围的读取能够正确处理。
 
         使用 parametrize 覆盖单格、小范围、大范围的读取场景，
@@ -282,7 +287,6 @@ class TestGetSheetInfo:
         resp = client.get("/api/sheets/nonexistent")
         assert resp.status_code == 500
         assert "detail" in resp.json()
-
 
 
 class TestErrorCases:

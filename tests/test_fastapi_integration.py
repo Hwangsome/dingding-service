@@ -9,27 +9,40 @@ import subprocess, sys, time, httpx, json
 
 PROC = None
 
+
 def start():
     global PROC
     PROC = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "dingding_service.spreadsheet.main:app", "--host", "127.0.0.1", "--port", "8765"],
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "dingding_service.spreadsheet.main:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8765",
+        ],
         cwd="/Users/bill/code/dingding-mcp",
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
     for _ in range(20):
         try:
             r = httpx.get("http://127.0.0.1:8765/health", timeout=2)
-            if r.status_code == 200: return True
+            if r.status_code == 200:
+                return True
         except Exception:
             pass
         time.sleep(0.5)
     return False
 
+
 def test(name, method, path, **kw):
     try:
         r = httpx.request(method, f"http://127.0.0.1:8765{path}", timeout=10, **kw)
         ok = 200 <= r.status_code < 300
-        print(f"  [{'OK' if ok else 'ERR'+str(r.status_code)}] {method:6} {path}")
+        print(f"  [{'OK' if ok else 'ERR' + str(r.status_code)}] {method:6} {path}")
         try:
             data = r.json()
             print(f"       {json.dumps(data, ensure_ascii=False)[:200]}")
@@ -40,6 +53,7 @@ def test(name, method, path, **kw):
         print(f"  [ERR] {method:6} {path}  {e}")
         return False
 
+
 def main():
     print("Starting FastAPI on :8765...")
     if not start():
@@ -48,19 +62,50 @@ def main():
     print("Service started\n")
 
     results = []
-    results.append(test("Health",  "GET",  "/health"))
-    results.append(test("List",    "GET",  "/api/sheets"))
-    results.append(test("Create",  "POST", "/api/sheets", json={"name": "MCP_API测试_请删除"}))
-    results.append(test("Read",    "GET",  "/api/sheets/kgqie6hm/range?range=A1:B3"))
-    results.append(test("Write",   "PUT",  "/api/sheets/kgqie6hm/range", json={"range": "A1:B2", "values": [["API测试1","API测试2"],["OK1","OK2"]]}))
-    results.append(test("Verify",  "GET",  "/api/sheets/kgqie6hm/range?range=A1:B2"))
-    results.append(test("InsRow",  "POST", "/api/sheets/kgqie6hm/insertRowsBefore", json={"row": 3, "row_count": 1}))
-    results.append(test("InsCol",  "POST", "/api/sheets/kgqie6hm/insertColumnsBefore", json={"column": 3, "column_count": 1}))
+    results.append(test("Health", "GET", "/health"))
+    results.append(test("List", "GET", "/api/sheets"))
+    results.append(test("Create", "POST", "/api/sheets", json={"name": "MCP_API测试_请删除"}))
+    results.append(test("Read", "GET", "/api/sheets/kgqie6hm/range?range=A1:B3"))
+    results.append(
+        test(
+            "Write",
+            "PUT",
+            "/api/sheets/kgqie6hm/range",
+            json={"range": "A1:B2", "values": [["API测试1", "API测试2"], ["OK1", "OK2"]]},
+        )
+    )
+    results.append(test("Verify", "GET", "/api/sheets/kgqie6hm/range?range=A1:B2"))
+    results.append(
+        test(
+            "InsRow",
+            "POST",
+            "/api/sheets/kgqie6hm/insertRowsBefore",
+            json={"row": 3, "row_count": 1},
+        )
+    )
+    results.append(
+        test(
+            "InsCol",
+            "POST",
+            "/api/sheets/kgqie6hm/insertColumnsBefore",
+            json={"column": 3, "column_count": 1},
+        )
+    )
 
     # restore & cleanup
-    httpx.put("http://127.0.0.1:8765/api/sheets/kgqie6hm/range", timeout=10, json={
-        "range": "A1:C4", "values": [["Name","Score",""],["Alice","100",""],["Bob","99",""],["Charlie","88",""]]
-    })
+    httpx.put(
+        "http://127.0.0.1:8765/api/sheets/kgqie6hm/range",
+        timeout=10,
+        json={
+            "range": "A1:C4",
+            "values": [
+                ["Name", "Score", ""],
+                ["Alice", "100", ""],
+                ["Bob", "99", ""],
+                ["Charlie", "88", ""],
+            ],
+        },
+    )
     # delete test sheet if created
     sheets = httpx.get("http://127.0.0.1:8765/api/sheets", timeout=10).json()
     for s in sheets.get("value", []):
@@ -71,6 +116,7 @@ def main():
     print(f"\n  Passed: {sum(results)}/{len(results)}")
 
     PROC.terminate()
+
 
 if __name__ == "__main__":
     main()

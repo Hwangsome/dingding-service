@@ -4,13 +4,14 @@
 所有 mock 数据尽量贴近真实钉钉 API 响应结构。
 """
 
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock
 
-from dingding_service.spreadsheet.main import create_app
+import pytest
+from fastapi.testclient import TestClient
+
 from dingding_service.spreadsheet.config import Settings
-from dingding_service.spreadsheet.routes import get_settings, get_client
+from dingding_service.spreadsheet.main import create_app
+from dingding_service.spreadsheet.routes import get_client, get_settings
 
 
 @pytest.fixture
@@ -78,9 +79,7 @@ def mock_client():
             ]
         }
     )
-    mock.create_sheet = AsyncMock(
-        return_value={"id": "new_sheet_id", "name": "NewSheet"}
-    )
+    mock.create_sheet = AsyncMock(return_value={"id": "new_sheet_id", "name": "NewSheet"})
     mock.delete_sheet = AsyncMock(return_value={})
     mock.get_range = AsyncMock(
         return_value={
@@ -116,6 +115,7 @@ def setup_standard_mocks(mock_settings, mock_client, app):
     将 mock_settings 和 mock_client 注入到 FastAPI 依赖系统中，
     使所有路由使用测试替身而非真实钉钉 API 调用。
     """
+
     async def _override_get_client():
         return mock_client
 

@@ -32,7 +32,6 @@ VERIFIED_OPS = {
         "query": "operatorId={unionId}",
         "status": "OK",
     },
-
     # Range 读写
     "读取单元格区域": {
         "method": "GET",
@@ -48,7 +47,6 @@ VERIFIED_OPS = {
         "body": {"values": [["行1列1", "行1列2"], ["行2列1", "行2列2"]]},
         "status": "OK",
     },
-
     # 行列操作
     "指定行上方插入行": {
         "method": "POST",
@@ -110,7 +108,7 @@ REQUIRED_PARAMS = {
 # Python 调用示例
 # ═══════════════════════════════════════════════════════
 
-EXAMPLE = '''
+EXAMPLE = """
 import httpx
 import asyncio
 
@@ -179,7 +177,7 @@ async def spreadsheet_example():
         )
 
 asyncio.run(spreadsheet_example())
-'''
+"""
 
 if __name__ == "__main__":
     print("钉钉 Spreadsheet API 已验证操作:")

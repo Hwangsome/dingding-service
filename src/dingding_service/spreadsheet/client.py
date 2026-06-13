@@ -120,9 +120,7 @@ class SpreadsheetClient:
             "Content-Type": "application/json",
         }
 
-    async def _request(
-        self, method: str, path: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         """统一的 HTTP 请求处理入口。
 
         所有 API 调用都通过此方法转发，统一处理：
@@ -143,7 +141,10 @@ class SpreadsheetClient:
         """
         headers = kwargs.pop("headers", None) or await self._headers()
         logger.debug(
-            "API 请求 | %s %s | params=%s", method, path, kwargs.get("params"),
+            "API 请求 | %s %s | params=%s",
+            method,
+            path,
+            kwargs.get("params"),
         )
 
         try:
@@ -158,7 +159,10 @@ class SpreadsheetClient:
         if resp.is_error:
             logger.warning(
                 "API 调用失败 | %s %s | status=%d body=%s",
-                method, path, resp.status_code, resp.text[:300],
+                method,
+                path,
+                resp.status_code,
+                resp.text[:300],
             )
             try:
                 detail = resp.json()
@@ -167,13 +171,14 @@ class SpreadsheetClient:
             return {"error": str(detail), "status_code": resp.status_code}
 
         logger.debug(
-            "API 响应成功 | %s %s | 数据量=%d", method, path, len(resp.content),
+            "API 响应成功 | %s %s | 数据量=%d",
+            method,
+            path,
+            len(resp.content),
         )
         return resp.json()
 
-    async def list_sheets(
-        self, workbook_id: str, union_id: str
-    ) -> dict[str, Any]:
+    async def list_sheets(self, workbook_id: str, union_id: str) -> dict[str, Any]:
         """获取指定工作簿的所有工作表。
 
         Args:
@@ -185,7 +190,8 @@ class SpreadsheetClient:
         """
         logger.info(
             "列出工作表 | workbook=%s operator=%s",
-            workbook_id, union_id[:8] if union_id else "",
+            workbook_id,
+            union_id[:8] if union_id else "",
         )
         return await self._request(
             "GET",
@@ -193,9 +199,7 @@ class SpreadsheetClient:
             params={"operatorId": union_id},
         )
 
-    async def create_sheet(
-        self, workbook_id: str, union_id: str, name: str
-    ) -> dict[str, Any]:
+    async def create_sheet(self, workbook_id: str, union_id: str, name: str) -> dict[str, Any]:
         """在指定工作簿中创建新工作表。
 
         Args:
@@ -214,9 +218,7 @@ class SpreadsheetClient:
             json={"name": name},
         )
 
-    async def delete_sheet(
-        self, workbook_id: str, union_id: str, sheet_id: str
-    ) -> dict[str, Any]:
+    async def delete_sheet(self, workbook_id: str, union_id: str, sheet_id: str) -> dict[str, Any]:
         """删除指定工作表。
 
         Args:
@@ -252,7 +254,9 @@ class SpreadsheetClient:
         """
         logger.info(
             "读取单元格区域 | workbook=%s sheet=%s range=%s",
-            workbook_id, sheet_id, range_str,
+            workbook_id,
+            sheet_id,
+            range_str,
         )
         return await self._request(
             "GET",
@@ -282,7 +286,10 @@ class SpreadsheetClient:
         """
         logger.info(
             "写入单元格区域 | workbook=%s sheet=%s range=%s rows=%d",
-            workbook_id, sheet_id, range_str, len(values),
+            workbook_id,
+            sheet_id,
+            range_str,
+            len(values),
         )
         return await self._request(
             "PUT",
@@ -313,7 +320,10 @@ class SpreadsheetClient:
         """
         logger.info(
             "插入空行 | workbook=%s sheet=%s row=%d count=%d",
-            workbook_id, sheet_id, row, row_count,
+            workbook_id,
+            sheet_id,
+            row,
+            row_count,
         )
         return await self._request(
             "POST",
@@ -344,7 +354,10 @@ class SpreadsheetClient:
         """
         logger.info(
             "插入空列 | workbook=%s sheet=%s col=%d count=%d",
-            workbook_id, sheet_id, column, column_count,
+            workbook_id,
+            sheet_id,
+            column,
+            column_count,
         )
         return await self._request(
             "POST",
@@ -371,7 +384,9 @@ class SpreadsheetClient:
         """
         logger.info(
             "清除区域内容 | workbook=%s sheet=%s range=%s",
-            workbook_id, sheet_id, range_str,
+            workbook_id,
+            sheet_id,
+            range_str,
         )
         return await self._request(
             "POST",
@@ -392,9 +407,7 @@ class SpreadsheetClient:
         Returns:
             dict 包含工作表的名称、ID 等元信息
         """
-        logger.info(
-            "查询工作表信息 | workbook=%s sheet=%s", workbook_id, sheet_id
-        )
+        logger.info("查询工作表信息 | workbook=%s sheet=%s", workbook_id, sheet_id)
         return await self._request(
             "GET",
             f"/v1.0/doc/workbooks/{workbook_id}/sheets/{sheet_id}",
@@ -419,9 +432,7 @@ class SpreadsheetClient:
         Returns:
             dict 包含搜索结果列表
         """
-        logger.info(
-            "搜索文档 | keyword=%s max_results=%d", keyword, max_results
-        )
+        logger.info("搜索文档 | keyword=%s max_results=%d", keyword, max_results)
         return await self._request(
             "POST",
             "/v2.0/storage/dentries/search",

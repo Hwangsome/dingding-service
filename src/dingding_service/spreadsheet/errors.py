@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 # 错误码常量
 # ---------------------------------------------------------------------------
 
+
 class ErrorCode:
     """预定义的错误码，用于在响应中标识错误类别。"""
+
     # 通用错误 (1000 段)
     UNKNOWN = "E1000"
     VALIDATION = "E1001"
@@ -155,7 +157,10 @@ async def spreadsheet_exception_handler(request: Request, exc: SpreadsheetError)
 
     logger.error(
         "SpreadsheetError | code=%s status=%d message=%s request_id=%s",
-        error_code, status_code, exc, exc.request_id,
+        error_code,
+        status_code,
+        exc,
+        exc.request_id,
     )
     return JSONResponse(
         status_code=status_code,

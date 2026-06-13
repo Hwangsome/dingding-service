@@ -21,6 +21,7 @@ class SheetInfo(BaseModel):
         name: 工作表名称（如 "Sheet1"、"员工信息表"）
         id:   工作表的唯一标识 ID
     """
+
     name: str = Field(..., description="工作表显示名称", examples=["Sheet1"])
     id: str = Field(..., description="工作表唯一标识", examples=["kgqie6hm"])
 
@@ -34,6 +35,7 @@ class CreateSheetRequest(BaseModel):
         >>> CreateSheetRequest(name="员工信息表")
         CreateSheetRequest(name='员工信息表')
     """
+
     name: str = Field(
         ...,
         min_length=1,
@@ -52,6 +54,7 @@ class RangeWriteRequest(BaseModel):
         range:  目标区域（如 "A1:C3"）
         values: 二维数组，外层行、内层列；长度应与 range 范围匹配
     """
+
     range: str = Field(
         ...,
         description="要写入的单元格范围，如 'A1:C3'",
@@ -73,6 +76,7 @@ class InsertRowsRequest(BaseModel):
         row:       目标行号（从 1 开始）
         row_count: 要插入的行数，默认 1
     """
+
     row: int = Field(
         ...,
         ge=1,
@@ -97,6 +101,7 @@ class InsertColsRequest(BaseModel):
         column:       目标列号（从 1 开始）
         column_count: 要插入的列数，默认 1
     """
+
     column: int = Field(
         ...,
         ge=1,
@@ -120,6 +125,7 @@ class ClearRangeRequest(BaseModel):
     Attributes:
         range: 要清除的单元格范围（如 "A1:C3"），内容清空后格式保留
     """
+
     range: str = Field(
         ...,
         description="要清除的单元格范围，内容清空但单元格格式保留",
@@ -137,6 +143,7 @@ class HealthResponse(BaseModel):
         token_valid: 钉钉 accessToken 是否有效
         workbook_id: 当前配置的默认工作簿 ID
     """
+
     status: str = Field(
         ...,
         description="服务健康状态：ok 表示正常，unconfigured 表示配置不完整",
@@ -164,6 +171,7 @@ class ErrorResponse(BaseModel):
         error_code: 机器可读的错误码（如 E2000、E3001），用于告警和自动化处理
         request_id: 请求追踪 ID，用于日志关联（可选）
     """
+
     detail: str = Field(
         ...,
         description="错误详细描述",
@@ -189,6 +197,7 @@ class ListSheetsResponse(BaseModel):
     Attributes:
         sheets: 工作表信息列表
     """
+
     sheets: list[SheetInfo] = Field(
         ...,
         description="当前工作簿下的所有工作表列表",

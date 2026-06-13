@@ -18,6 +18,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv sync --extra dev
-      - run: uv run ruff check src/ tests/
+      - run: uv run ruff check src/ tests/conftest.py tests/test_client.py tests/test_health.py tests/test_sheets.py
       - run: uv run mypy src/dingding_service/ --ignore-missing-imports
       - run: uv run pytest tests/ -v

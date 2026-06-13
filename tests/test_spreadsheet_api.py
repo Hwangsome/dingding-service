@@ -101,7 +101,9 @@ async def main():
         # ═══════════════════════════════════════════════
         print(">>> 尝试获取当前应用权限信息")
         try:
-            status, data = await call_api(client, token, "GET", "/v1.0/oauth2/accessToken/permissions")
+            status, data = await call_api(
+                client, token, "GET", "/v1.0/oauth2/accessToken/permissions"
+            )
             print(f"  权限查询: {status} - {json.dumps(data, ensure_ascii=False)[:200]}")
         except Exception as e:
             print(f"  失败: {e}")

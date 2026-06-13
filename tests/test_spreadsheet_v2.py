@@ -122,12 +122,26 @@ async def main():
         print()
         print("  尝试创建 workbook:")
         create_tests = [
-            ("创建 workbook-路径1", "POST", "/v1.0/doc/workbooks", {"name": "MCP测试表格", "operatorId": unionid} if unionid else None),
-            ("创建 workbook-路径2", "POST", "/v1.0/doc/workspaces/default/docs", {"name": "MCP测试表格", "docType": "WORKBOOK", "operatorId": unionid} if unionid else None),
+            (
+                "创建 workbook-路径1",
+                "POST",
+                "/v1.0/doc/workbooks",
+                {"name": "MCP测试表格", "operatorId": unionid} if unionid else None,
+            ),
+            (
+                "创建 workbook-路径2",
+                "POST",
+                "/v1.0/doc/workspaces/default/docs",
+                {"name": "MCP测试表格", "docType": "WORKBOOK", "operatorId": unionid}
+                if unionid
+                else None,
+            ),
         ]
         for name, method, path, body in create_tests:
             try:
-                resp = await c.request(method, f"{BASE_URL}{path}", headers=header(token), json=body)
+                resp = await c.request(
+                    method, f"{BASE_URL}{path}", headers=header(token), json=body
+                )
                 msg = resp.json() if resp.text else {}
                 results[f"{method} {path}"] = (resp.status_code, msg)
                 print(f"  [{icon(resp.status_code)}] {method} {path} (HTTP {resp.status_code})")
@@ -150,13 +164,27 @@ async def main():
 
         spreadsheet_tests = [
             ("获取所有工作表", "GET", f"/v1.0/doc/workbooks/{dummy_wb}/sheets"),
-            ("获取单元格区域", "GET", f"/v1.0/doc/workbooks/{dummy_wb}/sheets/{dummy_sheet}/ranges/A1:B2"),
-            ("更新单元格区域", "PUT", f"/v1.0/doc/workbooks/{dummy_wb}/sheets/{dummy_sheet}/ranges/A1:B2"),
+            (
+                "获取单元格区域",
+                "GET",
+                f"/v1.0/doc/workbooks/{dummy_wb}/sheets/{dummy_sheet}/ranges/A1:B2",
+            ),
+            (
+                "更新单元格区域",
+                "PUT",
+                f"/v1.0/doc/workbooks/{dummy_wb}/sheets/{dummy_sheet}/ranges/A1:B2",
+            ),
         ]
         for name, method, path in spreadsheet_tests:
             try:
-                body = {"values": [["测试1", "测试2"], ["测试3", "测试4"]]} if method == "PUT" else None
-                resp = await c.request(method, f"{BASE_URL}{path}", headers=header(token), json=body)
+                body = (
+                    {"values": [["测试1", "测试2"], ["测试3", "测试4"]]}
+                    if method == "PUT"
+                    else None
+                )
+                resp = await c.request(
+                    method, f"{BASE_URL}{path}", headers=header(token), json=body
+                )
                 msg = resp.json() if resp.text else {}
                 error_code = resp.status_code
                 reason = msg.get("message", "")[:120] if isinstance(msg, dict) else ""

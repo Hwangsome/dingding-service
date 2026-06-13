@@ -229,12 +229,12 @@ async def write_range(
     """
     logger.info(
         "PUT /api/sheets/%s/range — 写入区域 | range=%s rows=%d",
-        sheet_id, body.range, len(body.values),
+        sheet_id,
+        body.range,
+        len(body.values),
     )
     wid, operator = _require_config(settings)
-    result = await _call(
-        client, "update_range", wid, operator, sheet_id, body.range, body.values
-    )
+    result = await _call(client, "update_range", wid, operator, sheet_id, body.range, body.values)
     return result
 
 
@@ -255,7 +255,9 @@ async def insert_rows_before(
     """
     logger.info(
         "POST /api/sheets/%s/insertRowsBefore — 插入行 | row=%d count=%d",
-        sheet_id, body.row, body.row_count,
+        sheet_id,
+        body.row,
+        body.row_count,
     )
     wid, operator = _require_config(settings)
     result = await _call(
@@ -281,7 +283,9 @@ async def insert_cols_before(
     """
     logger.info(
         "POST /api/sheets/%s/insertColumnsBefore — 插入列 | col=%d count=%d",
-        sheet_id, body.column, body.column_count,
+        sheet_id,
+        body.column,
+        body.column_count,
     )
     wid, operator = _require_config(settings)
     result = await _call(
@@ -326,9 +330,9 @@ async def clear_range(
     """
     logger.info(
         "POST /api/sheets/%s/range/clear — 清除区域 | range=%s",
-        sheet_id, body.range,
+        sheet_id,
+        body.range,
     )
     wid, operator = _require_config(settings)
     result = await _call(client, "clear_range", wid, operator, sheet_id, body.range)
     return result
-

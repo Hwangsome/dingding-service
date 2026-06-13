@@ -7,9 +7,9 @@
 """
 
 import time
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from dingding_service.spreadsheet.client import SpreadsheetClient
 
@@ -30,8 +30,13 @@ class TestSpreadsheetClient:
         """创建未认证的 SpreadsheetClient 实例（使用测试用 app_key/app_secret）。"""
         return SpreadsheetClient(app_key="test_key", app_secret="test_secret")
 
-    def _make_response(self, is_error: bool = False, status_code: int = 200,
-                       json_data: dict | None = None, text: str = ""):
+    def _make_response(
+        self,
+        is_error: bool = False,
+        status_code: int = 200,
+        json_data: dict | None = None,
+        text: str = "",
+    ):
         """创建模拟的 httpx 响应对象。
 
         httpx.Response 的方法（如 .json()）是同步的，
@@ -97,7 +102,8 @@ class TestSpreadsheetClient:
         当钉钉 API 返回 401 错误时，get_token 应返回 "" 而非抛出异常。
         """
         mock_resp = self._make_response(
-            is_error=True, status_code=401,
+            is_error=True,
+            status_code=401,
             json_data={"message": "Invalid appKey"},
         )
         client._client.post = AsyncMock(return_value=mock_resp)
@@ -140,7 +146,8 @@ class TestSpreadsheetClient:
         client._token_expires_at = time.time() + 3600
 
         mock_resp = self._make_response(
-            is_error=True, status_code=400,
+            is_error=True,
+            status_code=400,
             json_data={"message": "bad request"},
         )
         client._client.request = AsyncMock(return_value=mock_resp)
@@ -201,6 +208,7 @@ class TestSpreadsheetClient:
         client._token = "fake_token"
         client._token_expires_at = time.time() + 3600
         import httpx
+
         client._client.request = AsyncMock(side_effect=httpx.TimeoutException("Connection timeout"))
 
         result = await client.get_range("wb1", "u1", "s1", "A1:B2")

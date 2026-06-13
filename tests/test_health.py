@@ -8,7 +8,7 @@ class TestHealthEndpoint:
 
     def test_health_ok(self, client, mock_settings, mock_client):
         """When workbook_id and operator_union_id are configured, status is 'ok'."""
-        from dingding_service.spreadsheet.routes import get_settings, get_client
+        from dingding_service.spreadsheet.routes import get_client, get_settings
 
         async def _override_get_client():
             return mock_client
@@ -40,7 +40,7 @@ class TestHealthEndpoint:
 
     def test_health_token_failure(self, client, mock_settings, mock_client):
         """When get_token returns empty, token_valid is False."""
-        from dingding_service.spreadsheet.routes import get_settings, get_client
+        from dingding_service.spreadsheet.routes import get_client, get_settings
 
         mock_client.get_token = AsyncMock(return_value="")
 
@@ -59,7 +59,7 @@ class TestHealthEndpoint:
 
     def test_health_returns_response_model(self, client, mock_settings, mock_client):
         """Response matches HealthResponse schema."""
-        from dingding_service.spreadsheet.routes import get_settings, get_client
+        from dingding_service.spreadsheet.routes import get_client, get_settings
 
         async def _override_get_client():
             return mock_client
