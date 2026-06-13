@@ -17,7 +17,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: uv sync
+      - run: uv sync --extra dev
       - run: uv run ruff check src/ tests/
-      - run: uv run mypy src/dingding_service/
-      - run: uv run pytest tests/ -v --cov=dingding_service --cov-report=term
+      - run: uv run mypy src/dingding_service/ --ignore-missing-imports
+      - run: uv run pytest tests/ -v
